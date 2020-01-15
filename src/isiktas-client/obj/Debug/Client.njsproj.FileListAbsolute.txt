@@ -1,0 +1,2 @@
+C:\Users\Onur\Projects\IsıkApp\src\isiktas-client\obj\Debug\Client.njsprojAssemblyReference.cache
+C:\Users\Onur\Projects\IsıkApp\src\isiktas-client\bin\Microsoft.NodejsTools.WebRole.dll
