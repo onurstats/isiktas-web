@@ -2,7 +2,7 @@
   <v-layout>
     <v-card width="100%">
       <v-toolbar color="primary" dark flat
-        ><v-toolbar-title>Dersler</v-toolbar-title>
+        ><v-toolbar-title>Sınıflar</v-toolbar-title>
         <v-spacer></v-spacer>
         <template v-slot:extension>
           <v-btn
@@ -21,7 +21,7 @@
         <v-layout row justify-center align-center>
           <v-col cols="5">
             <v-list single-line>
-              <template v-for="(s, i) of subjects">
+              <template v-for="(s, i) of classes">
                 <v-list-item :key="s.name" row>
                   <v-list-item-avatar color="primary">
                     {{ i + 1 }}
@@ -46,9 +46,9 @@
       <v-card class="mx-auto my-auto">
         <v-toolbar color="secondary" dark flat>
           <v-toolbar-title>
-            Ders
+            Sınıf
             <span v-if="!editmode">Ekle</span>
-            <span v-if="editmode">{{ subject.name }}</span>
+            <span v-if="editmode">{{ oclass.name }}</span>
           </v-toolbar-title>
           <v-spacer />
           <v-btn @click="dialog = false" icon>
@@ -58,7 +58,7 @@
         <v-card-text>
           <v-form ref="form" v-model="form" class="my-12">
             <v-text-field
-              v-model="subject.name"
+              v-model="oclass.name"
               :rules="[rules.min(3)]"
               type="text"
               placeholder="Ders Adı Giriniz"
@@ -90,7 +90,7 @@ export default {
   data() {
     return {
       dialog: false,
-      subject: { name: '' },
+      oclass: { name: '' },
       form: false,
       editmode: false,
       deleteprompt: false,
@@ -105,47 +105,45 @@ export default {
   },
   head() {
     return {
-      title: 'Dersler',
+      title: 'Sınıflar',
       meta: [
         // hid is used as unique identifier. Do not use `vmid` for it as it will not work
         {
-          hid: 'subjects',
-          name: 'subjects',
-          content: 'Page About Subjects'
+          hid: 'classes',
+          name: 'classes',
+          content: 'Page About Classes'
         }
       ]
     }
   },
   computed: {
-    ...mapGetters('subjects', ['subjects'])
+    ...mapGetters('classes', ['classes'])
   },
   created() {
-    this.$store.dispatch('subjects/get')
+    this.$store.dispatch('classes/get')
   },
   methods: {
     save() {
-      this.$store.dispatch('subjects/add', this.subject).then(() => {
-        this.subject = ''
-        this.dialog = false
-      })
+      this.$store.dispatch('classes/add', this.oclass)
+      this.dialog = false
     },
     edit(s) {
-      this.subject = s
+      this.oclass = s
       this.editmode = true
       this.dialog = true
     },
     deleteSubject() {
       this.$store
         .dispatch('confirmer/ask', {
-          title: 'Sil',
-          body: 'Emin Misiniz!'
+          title: 'Really Destroy world?',
+          body: "This would suck, dude! Don't be a dick!"
         })
         .then((confirmation) => {
           if (confirmation) {
-            this.$store.dispatch('subjects/delete', this.subject)
+            this.$store.dispatch('classes/delete', this.oclass)
             this.dialog = false
           } else {
-            return null
+            alert('cancel')
           }
         })
     }

@@ -19,6 +19,66 @@ namespace Api.Migrations
                 .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            modelBuilder.Entity("Api.Models.OClass", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("classes");
+                });
+
+            modelBuilder.Entity("Api.Models.Student", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("OClassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Tck")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Tel")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OClassId");
+
+                    b.ToTable("students");
+                });
+
             modelBuilder.Entity("Api.Models.Subject", b =>
                 {
                     b.Property<Guid>("Id")
@@ -29,6 +89,7 @@ namespace Api.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedOn")
@@ -38,6 +99,51 @@ namespace Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("subjects");
+                });
+
+            modelBuilder.Entity("Api.Models.Teacher", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Tck")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Tel")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("teachers");
+                });
+
+            modelBuilder.Entity("Api.Models.Student", b =>
+                {
+                    b.HasOne("Api.Models.OClass", "OClass")
+                        .WithMany("Students")
+                        .HasForeignKey("OClassId");
+                });
+
+            modelBuilder.Entity("Api.Models.Teacher", b =>
+                {
+                    b.HasOne("Api.Models.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId");
                 });
 #pragma warning restore 612, 618
         }

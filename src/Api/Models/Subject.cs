@@ -10,6 +10,7 @@ namespace Api.Models
     {
         [Key]
         public Guid Id { get; set; }
+        [Required]
         public String Name { get; set; }
 
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;

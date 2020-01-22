@@ -2,7 +2,7 @@
   <v-layout>
     <v-card width="100%">
       <v-toolbar color="primary" dark flat
-        ><v-toolbar-title>Dersler</v-toolbar-title>
+        ><v-toolbar-title>Öğretmenler</v-toolbar-title>
         <v-spacer></v-spacer>
         <template v-slot:extension>
           <v-btn
@@ -21,11 +21,8 @@
         <v-layout row justify-center align-center>
           <v-col cols="5">
             <v-list single-line>
-              <template v-for="(s, i) of subjects">
+              <template v-for="(s, i) of teachers">
                 <v-list-item :key="s.name" row>
-                  <v-list-item-avatar color="primary">
-                    {{ i + 1 }}
-                  </v-list-item-avatar>
                   <v-list-item-content>{{ s.name }}</v-list-item-content>
                   <v-list-item-action>
                     <v-btn icon>
@@ -48,7 +45,7 @@
           <v-toolbar-title>
             Ders
             <span v-if="!editmode">Ekle</span>
-            <span v-if="editmode">{{ subject.name }}</span>
+            <span v-if="editmode">{{ subject }}</span>
           </v-toolbar-title>
           <v-spacer />
           <v-btn @click="dialog = false" icon>
@@ -56,9 +53,9 @@
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          <v-form ref="form" v-model="form" class="my-12">
+          <v-form ref="form" v-model="form" class="my-24">
             <v-text-field
-              v-model="subject.name"
+              v-model="subject"
               :rules="[rules.min(3)]"
               type="text"
               placeholder="Ders Adı Giriniz"
@@ -90,7 +87,7 @@ export default {
   data() {
     return {
       dialog: false,
-      subject: { name: '' },
+      teacher: '',
       form: false,
       editmode: false,
       deleteprompt: false,
@@ -105,47 +102,44 @@ export default {
   },
   head() {
     return {
-      title: 'Dersler',
+      title: 'Öğretmenler',
       meta: [
         // hid is used as unique identifier. Do not use `vmid` for it as it will not work
         {
-          hid: 'subjects',
-          name: 'subjects',
-          content: 'Page About Subjects'
+          hid: 'teachers',
+          name: 'teachers',
+          content: 'Page About Teachers'
         }
       ]
     }
   },
   computed: {
-    ...mapGetters('subjects', ['subjects'])
+    ...mapGetters(['teachers', 'subjects'])
   },
   created() {
-    this.$store.dispatch('subjects/get')
+    this.$store.dispatch('getTeachers')
+    this.$store.dispatch('getSubjects')
   },
   methods: {
     save() {
-      this.$store.dispatch('subjects/add', this.subject).then(() => {
-        this.subject = ''
-        this.dialog = false
-      })
+      this.$store.dispatch('addTeacher', this.teacher)
     },
     edit(s) {
-      this.subject = s
+      this.subject = s.name
       this.editmode = true
       this.dialog = true
     },
     deleteSubject() {
       this.$store
         .dispatch('confirmer/ask', {
-          title: 'Sil',
-          body: 'Emin Misiniz!'
+          title: 'Really Destroy world?',
+          body: "This would suck, dude! Don't be a dick!"
         })
         .then((confirmation) => {
           if (confirmation) {
-            this.$store.dispatch('subjects/delete', this.subject)
-            this.dialog = false
+            alert('ok')
           } else {
-            return null
+            alert('cancel')
           }
         })
     }

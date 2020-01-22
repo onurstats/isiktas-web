@@ -6,7 +6,7 @@ const initialState = {
   reject: null
 }
 
-export const state = Object.assign({}, initialState)
+export const state = () => Object.assign({}, initialState)
 
 export const mutations = {
   ACTIVATE: (state, payload) => {

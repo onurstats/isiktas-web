@@ -11,6 +11,9 @@ namespace Api.Data
         {
         }
         public DbSet<Subject> Subjects { get; set; }
+        public DbSet<OClass> OClass {get;set;}
+        public DbSet<Teacher> Teachers { get; set; }
+        public DbSet<Student> Students { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -75,7 +75,6 @@ export default {
   },
   mounted() {
     window.addEventListener('vuexoidc:userLoaded', this.userLoaded)
-    this.$store.commit('setSubtitle', 'Dersler')
     if (!this.oidcIsAuthenticated) {
       this.$router.push('/login')
     }
