@@ -20,12 +20,10 @@
     </v-navigation-drawer>
     <v-app-bar clipped-left fixed app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn @click.stop="fixed = !fixed" icon>
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
       <v-toolbar-title v-text="title" />
       <v-spacer />
-      <a v-if="oidcIsAuthenticated" @click.prevent="signOut" href>Sign out</a>
+      <v-btn v-if="oidcUser" text>{{ oidcUser.name }}</v-btn>
+      <v-btn v-if="oidcIsAuthenticated" @click.stop="signOut">Çıkış</v-btn>
     </v-app-bar>
     <v-content>
       <v-container fluid>
@@ -61,14 +59,14 @@ export default {
         { title: 'Öğretmenler', icon: 'mdi-teach', path: '/teachers' },
         { title: 'Ögrenciler', icon: 'mdi-account-group', path: '/students' },
         { title: 'Dersler', icon: 'mdi-flask', path: '/subjects' },
-        { title: 'Sınıflar', icon: 'mdi-chair-school', path: '/classes' }
+        { title: 'Sınıflar', icon: 'mdi-chair-school', path: '/classes' },
+        { title: 'Ayarlar', icon: 'mdi-settings', path: '/settings' }
       ],
       title: 'Işıktaş Eğitim'
     }
   },
   computed: {
-    ...mapGetters('oidc', ['oidcIsAuthenticated']),
-    ...mapGetters(['subtitle']),
+    ...mapGetters('oidc', ['oidcIsAuthenticated', 'oidcUser']),
     hasAccess() {
       return this.oidcIsAuthenticated || this.oidcIsRoutePublic(this.$route)
     }

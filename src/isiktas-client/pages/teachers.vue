@@ -5,28 +5,41 @@
         ><v-toolbar-title>Öğretmenler</v-toolbar-title>
         <v-spacer></v-spacer>
         <template v-slot:extension>
-          <v-btn
-            @click.stop="dialog = true"
-            fab
-            color="white"
-            bottom
-            left
-            absolute
-          >
+          <v-btn @click.stop="addClick" fab color="white" bottom left absolute>
             <v-icon class="black--text">mdi-plus</v-icon>
           </v-btn>
         </template>
       </v-toolbar>
       <v-card-text>
         <v-layout row justify-center align-center>
-          <v-col cols="5">
+          <v-col cols="7">
+            <v-progress-linear
+              :active="isLoading"
+              indeterminate
+              color="yellow darken-2"
+            ></v-progress-linear>
             <v-list single-line>
-              <template v-for="(s, i) of teachers">
-                <v-list-item :key="s.name" row>
-                  <v-list-item-content>{{ s.name }}</v-list-item-content>
+              <template v-for="(t, i) of teachers">
+                <v-list-item :key="t.id" row>
+                  <v-list-item-content class="nameField"
+                    >{{ t.fullname }}
+                    <v-chip-group class="mx-auto">
+                      <v-chip
+                        v-for="s of t.subjects"
+                        :key="s"
+                        small
+                        outlined
+                        color="primary"
+                      >
+                        <span v-if="subjectList.find((x) => x.id === s)">
+                          {{ subjectList.find((x) => x.id === s).name }}
+                        </span>
+                      </v-chip>
+                    </v-chip-group>
+                  </v-list-item-content>
                   <v-list-item-action>
                     <v-btn icon>
-                      <v-icon @click.stop="edit(s)" color="grey lighten-1">
+                      <v-icon @click.stop="edit(t)" color="grey lighten-1">
                         mdi-square-edit-outline
                       </v-icon>
                     </v-btn>
@@ -39,13 +52,13 @@
         </v-layout>
       </v-card-text>
     </v-card>
-    <v-dialog v-model="dialog" max-width="290px">
+    <v-dialog v-model="dialog" max-width="400px" eager>
       <v-card class="mx-auto my-auto">
         <v-toolbar color="secondary" dark flat>
           <v-toolbar-title>
-            Ders
+            Öğretmen
             <span v-if="!editmode">Ekle</span>
-            <span v-if="editmode">{{ subject }}</span>
+            <span v-if="editmode">Düzenle - {{ teacher.fullName }}</span>
           </v-toolbar-title>
           <v-spacer />
           <v-btn @click="dialog = false" icon>
@@ -53,18 +66,54 @@
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          <v-form ref="form" v-model="form" class="my-24">
+          <v-form ref="form" v-model="form" class="my-12">
             <v-text-field
-              v-model="subject"
+              v-model="teacher.name"
               :rules="[rules.min(3)]"
               type="text"
-              placeholder="Ders Adı Giriniz"
-              label="Ders Adı"
+              placeholder="İsim Giriniz"
+              label="İsim"
             />
+            <v-text-field
+              v-model="teacher.lastName"
+              :rules="[rules.min(3)]"
+              type="text"
+              placeholder="Soyisim Giriniz"
+              label="Soyisim"
+            />
+            <v-text-field
+              v-model="teacher.tck"
+              :rules="[rules.tck]"
+              type="text"
+              placeholder="Tc Kimlik No Giriniz"
+              label="Tck"
+            />
+            <v-text-field
+              v-model="teacher.tel"
+              v-mask="telmask"
+              :rules="[rules.tel, rules.required]"
+              :placeholder="telmask"
+              type="tel"
+              label="Tel"
+            />
+            <v-autocomplete
+              v-model="teacher.subjects"
+              :items="subjectList"
+              chips
+              color="black lighten-2"
+              label="Branş"
+              item-text="name"
+              item-value="id"
+              multiple
+            >
+            </v-autocomplete>
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click.stop="save" :disabled="!form">
+          <v-btn v-if="!editmode" @click.stop="add" :disabled="!form">
+            Ekle
+          </v-btn>
+          <v-btn v-if="editmode" @click.stop="update" :disabled="!form">
             Kaydet
           </v-btn>
           <v-btn
@@ -82,21 +131,29 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { mask } from 'vue-the-mask'
 
 export default {
+  directives: {
+    mask
+  },
   data() {
     return {
       dialog: false,
-      teacher: '',
       form: false,
-      editmode: false,
+      teacher: {},
       deleteprompt: false,
+      telmask: '0(###) ###-##-##',
       rules: {
         min: (len) => (v) =>
           (v || '').length >= len || `En az ${len} haneli olmalıdır`,
         required: (v) => !!v || 'Zorunlu Alan',
         onlynumber: (v) =>
-          /(\d{11})/.test(v) || 'Sadece Rakamlardan Oluşmalıdır 11 Haneli'
+          /(\d{11})/.test(v) || 'Sadece Rakamlardan Oluşmalıdır 11 Haneli',
+        tel: (v) =>
+          /0\(\d{3}\) \d{3}-\d{2}-\d{2}/.test(v) || 'Telefon Numarası Giriniz',
+        tck: (v) =>
+          /(^\d{11})$/.test(v) || 'Tck 11 Haneli Rakamlardan Oluşmalıdır'
       }
     }
   },
@@ -114,35 +171,69 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['teachers', 'subjects'])
+    subjectList() {
+      const ret = []
+      for (const key in this.subjects) {
+        ret.push({ name: this.subjects[key].name, id: this.subjects[key].id })
+      }
+      // Object.values(subjects.list).sort((a, b) => (a.name > b.name ? 1 : -1))
+      return ret.sort((a, b) => (a.name > b.name ? 1 : -1))
+    },
+    ...mapGetters(['isLoading', 'editmode']),
+    ...mapGetters('subjects', ['subjects']),
+    ...mapGetters('teachers', ['teachers', 'active'])
   },
   created() {
-    this.$store.dispatch('getTeachers')
-    this.$store.dispatch('getSubjects')
+    this.$store.dispatch('teachers/get')
+    this.$store.dispatch('subjects/get')
   },
   methods: {
-    save() {
-      this.$store.dispatch('addTeacher', this.teacher)
+    add() {
+      this.$store
+        .dispatch('teachers/add', this.teacher)
+        .then(() => (this.dialog = false))
     },
-    edit(s) {
-      this.subject = s.name
-      this.editmode = true
+    addClick() {
+      this.$store.commit('teachers/unsetActive')
+      this.teacher = { ...this.active }
       this.dialog = true
+      this.$nextTick(this.$refs.form.reset())
+      this.$store.commit('setEditMode', false)
+    },
+    edit(teacher) {
+      this.$store.dispatch('teachers/getDetail', teacher.id).then(() => {
+        this.teacher = { ...this.active }
+        this.dialog = true
+        this.$store.commit('setEditMode', true)
+      })
+    },
+
+    update() {
+      this.$store
+        .dispatch('teachers/update', this.teacher)
+        .then(() => {
+          this.dialog = false
+        })
+        .catch((e) => console.log(e))
     },
     deleteSubject() {
       this.$store
         .dispatch('confirmer/ask', {
-          title: 'Really Destroy world?',
-          body: "This would suck, dude! Don't be a dick!"
+          title: 'Emin Misiniz?',
+          body: 'Öğretmen Silinecektir Emin Misiniz?'
         })
         .then((confirmation) => {
           if (confirmation) {
-            alert('ok')
+            this.$store.dispatch('teachers/delete').then((this.dialog = false))
           } else {
-            alert('cancel')
           }
         })
     }
   }
 }
 </script>
+<style scoped>
+.nameField {
+  text-transform: capitalize;
+}
+</style>

@@ -101,6 +101,21 @@ namespace Api.Migrations
                     b.ToTable("subjects");
                 });
 
+            modelBuilder.Entity("Api.Models.SubjectTeacher", b =>
+                {
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("SubjectId", "TeacherId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("subjects_teachers");
+                });
+
             modelBuilder.Entity("Api.Models.Teacher", b =>
                 {
                     b.Property<Guid>("Id")
@@ -115,9 +130,6 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("SubjectId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Tck")
                         .IsRequired()
                         .HasColumnType("text");
@@ -126,8 +138,6 @@ namespace Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SubjectId");
 
                     b.ToTable("teachers");
                 });
@@ -139,11 +149,19 @@ namespace Api.Migrations
                         .HasForeignKey("OClassId");
                 });
 
-            modelBuilder.Entity("Api.Models.Teacher", b =>
+            modelBuilder.Entity("Api.Models.SubjectTeacher", b =>
                 {
                     b.HasOne("Api.Models.Subject", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId");
+                        .WithMany("SubjectTeachers")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Api.Models.Teacher", "Teacher")
+                        .WithMany("SubjectTeachers")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

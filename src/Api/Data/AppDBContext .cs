@@ -11,13 +11,30 @@ namespace Api.Data
         {
         }
         public DbSet<Subject> Subjects { get; set; }
-        public DbSet<OClass> OClass {get;set;}
+        public DbSet<OClass> OClass { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        public DbSet<SubjectTeacher> SubjectTeachers { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(builder);
+            modelBuilder.Entity<SubjectTeacher>()
+             .HasKey(t => new { t.SubjectId, t.TeacherId });
+
+
+            modelBuilder.Entity<SubjectTeacher>()
+                .HasOne<Teacher>(pt => pt.Teacher)
+                .WithMany(p => p.SubjectTeachers)
+                .HasForeignKey(pt => pt.TeacherId);
+
+            modelBuilder.Entity<SubjectTeacher>()
+                .HasOne<Subject>(pt => pt.Subject)
+                .WithMany(t => t.SubjectTeachers)
+                .HasForeignKey(pt => pt.SubjectId);
+
+
         }
     }
 }

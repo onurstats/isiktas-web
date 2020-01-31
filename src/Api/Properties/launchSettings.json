@@ -11,6 +11,7 @@
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
+      "executablePath": "C:\\Program Files\\dotnet\\dotnet.exe",
       "commandLineArgs": "watch run",
       "launchBrowser": true,
       "launchUrl": "weatherforecast",
